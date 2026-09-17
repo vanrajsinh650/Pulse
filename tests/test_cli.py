@@ -33,6 +33,8 @@ def test_cli_investigate():
     runner = CliRunner()
     result = runner.invoke(main, ["investigate", "INC-001"])
     assert result.exit_code == 0
+    assert "Investigation source:" in result.output
+    assert "deterministic fallback" in result.output
     assert "limit_overrun" in result.output
     assert "confidence" in result.output
 

@@ -52,7 +52,7 @@ source changes / adapter breaks
                                   (Structured Diagnosis)   (pytest test files)
 ```
 
-> **Key Rule**: Deterministic checks are the authority. AI is only an assistant that explains verified evidence—it never decides whether data is correct.
+> **Key Rule**: Deterministic verification identifies whether a run violates declared invariants. When an incident is detected, Pulse can send the verified incident evidence to Gemini for a structured debugging diagnosis. AI does not determine correctness and cannot override verification results.
 
 ---
 
@@ -122,14 +122,26 @@ Suggested next step:
 
 ---
 
-### 2. Investigate the Bug with AI
-Get a structured JSON explanation backed strictly by verified trace evidence:
+### 2. Investigate the Bug with AI (Gemini 3.1 Flash-Lite)
+Deterministic verification identifies whether a run violates declared invariants. When an incident is detected, Pulse can send the verified incident evidence to Gemini for a structured debugging diagnosis. AI does not determine correctness and cannot override verification results.
 
+To investigate using Gemini:
 ```bash
+export GEMINI_API_KEY="..."
 pulse investigate INC-001
 ```
 
-```json
+**Without `GEMINI_API_KEY`:** Pulse uses the deterministic fallback diagnosis.
+```bash
+# Works completely offline without an API key:
+unset GEMINI_API_KEY
+pulse investigate INC-001
+```
+
+Output with Gemini:
+```text
+Investigation source: Gemini 3.1 Flash-Lite
+
 {
   "failure_type": "limit_overrun",
   "summary": "Requested limit of 20 was exceeded by 20 records across 2 requests.",
@@ -141,7 +153,8 @@ pulse investigate INC-001
   "likely_cause": "Adapter continues to fetch subsequent pages and does not enforce requested limit bound.",
   "confidence": 0.98,
   "recommended_action": "Enforce requested limit boundary and slice accumulated records before returning.",
-  "suggested_regression_test": "test_adapter_respects_requested_limit_bound"
+  "suggested_regression_test": "test_adapter_respects_requested_limit_bound",
+  "source": "Gemini 3.1 Flash-Lite"
 }
 ```
 

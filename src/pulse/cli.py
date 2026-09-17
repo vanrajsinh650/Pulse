@@ -166,8 +166,9 @@ def investigate_cmd(incident: str) -> None:
     report = verifier.verify(trace, incident_id=inc_dir.name)
 
     investigator = AIInvestigator()
-    diagnosis = investigator.investigate(report, diff=diff_report)
+    diagnosis = investigator.investigate(report, diff=diff_report, trace=trace)
 
+    console.print(f"[bold]Investigation source:[/] {diagnosis.source}\n")
     output_json = diagnosis.model_dump_json(indent=2)
     console.print(Panel(output_json, title=f"AI Investigation: {inc_dir.name}", border_style="cyan"))
 
@@ -274,7 +275,7 @@ def benchmark_cmd() -> None:
         )
 
     console.print(table)
-    console.print("\n[bold green]Summary:[/] All 3 incident classes diagnosed offline in < 10 ms with 0 live HTTP requests made.")
+    console.print("\n[bold green]Summary:[/] All 3 incident classes verified deterministically with 0 live HTTP requests made.")
 
 
 if __name__ == "__main__":

@@ -107,10 +107,11 @@ class IncidentReport(BaseModel):
 class InvestigationResult(BaseModel):
     """Structured AI diagnostic investigation."""
 
-    failure_type: str
-    summary: str
-    evidence: list[str] = Field(default_factory=list)
-    likely_cause: str
-    confidence: float = Field(ge=0.0, le=1.0)
-    recommended_action: str
-    suggested_regression_test: str
+    failure_type: str = Field(description="Classification of failure, e.g. pagination_stalled, limit_overrun, silent_zero_yield, insufficient_evidence")
+    summary: str = Field(description="Summary of the failure or diagnostic finding")
+    evidence: list[str] = Field(default_factory=list, description="Verified evidence backing the diagnosis")
+    likely_cause: str = Field(description="Technical root cause inferred from evidence")
+    confidence: float = Field(ge=0.0, le=1.0, description="Confidence level between 0.0 and 1.0")
+    recommended_action: str = Field(description="Smallest reasonable next debugging step")
+    suggested_regression_test: str = Field(description="Suggested regression test name protecting against this failure")
+    source: str = Field(default="deterministic fallback", description="Investigation source, e.g. 'Gemini 3.1 Flash-Lite' or 'deterministic fallback'")
