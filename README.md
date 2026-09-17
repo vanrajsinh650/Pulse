@@ -1,111 +1,102 @@
 # Pulse
 
-**Pulse** is a developer tool and verification laboratory that helps software engineers reproduce, investigate, and test web-data integration failures faster.
+> **A developer tool to reproduce, debug, and test broken web-data integrations faster.**
 
-When upstream websites mutate—pagination parameters stall, limits overrun, or markup shifts cause parsers to silently drop yield—engineers spend hours manually reconstructing state, querying live sites, and guessing root causes. Pulse provides a deterministic developer workflow to capture sanitized run traces, replay incidents completely offline, verify invariants with mathematical certainty, generate executable regression tests, and provide evidence-grounded root-cause diagnosis.
+When upstream websites change, scrapers and data adapters break in frustrating ways: pagination loops infinitely, limits get ignored, or markup changes cause parsers to return 0 listings without throwing an error.
 
-Pulse is designed around a core engineering principle: **deterministic verification is the authority, while AI is the assistant**. Correctness is never delegated to an LLM; rather, mathematical invariant checks detect the failure, and the AI investigator synthesizes structured, evidence-backed explanations from verified run facts.
+**Pulse** gives engineers an offline verification lab to:
+1. **Replay** integration failures offline without touching live websites.
+2. **Detect** exactly what failed using deterministic invariant checks (not probabilistic guessing).
+3. **Investigate** the root cause with an evidence-grounded AI assistant.
+4. **Generate** executable regression tests that fail now and pass once you fix the adapter.
 
 ---
 
-## Why Does It Exist?
+## The Core Workflow
 
-Public evidence from web-data engineering teams demonstrates recurring classes of upstream failures:
-* **Limit overruns**: Adapters fail to stop when reaching requested boundaries, making unnecessary requests.
-* **Pagination stalls & loops**: Adapters keep querying the same page or fail to advance cursors, ingesting duplicated records.
-* **Silent zero-yield parser failures**: Upstream HTTP requests return 200 OK with substantial payloads, but modified DOM or JSON keys cause parsers to silently return zero records.
-* **Request filter divergence**: Multi-page crawlers drop query parameters or filters between requests.
-* **Provenance loss**: Extracted records lose origin URLs, source IDs, or observation timestamps during normalization.
-
-Pulse solves this by turning integration failures into reproducible, version-controlled incident packages that can be diagnosed in milliseconds.
+```text
+source changes / adapter breaks
+            ↓
+    reproduce offline          →  pulse replay incidents/INC-001
+            ↓
+  deterministic check fails     →  FAILED: Limit bound exceeded (40 > 20)
+            ↓
+    diagnose root cause        →  pulse investigate INC-001
+            ↓
+  generate regression test     →  pulse generate-test INC-001
+            ↓
+     engineer fixes it
+            ↓
+       verify test             →  pytest (PASSES)
+```
 
 ---
 
 ## Architecture
 
 ```text
-                    REAL SOURCE (Nextimmo.lu)
-                                │
-                                ▼
-                         SOURCE ADAPTER
-                                │
-                                ▼
-                            RUN TRACE
-                                │
-                 ┌──────────────┴──────────────┐
-                 ▼                             ▼
-            BASELINE TRACE               INCIDENT TRACE
-                 │                             │
-                 └──────────────┬──────────────┘
-                                ▼
-                         STRUCTURAL DIFF
-                                │
-                                ▼
-                  DETERMINISTIC VERIFIER
-          ┌─────────────┬───────┴───────┬─────────────┐
-          ▼             ▼               ▼             ▼
-     LIMIT BOUND   PAGINATION      ZERO YIELD    PROVENANCE
-      INVARIANT    CONTINUITY       DETECTOR     INTEGRITY
-          │             │               │             │
-          └─────────────┴───────┬───────┴─────────────┘
-                                ▼
-                         INCIDENT REPORT
-                                │
-                 ┌──────────────┴──────────────┐
-                 ▼                             ▼
-          AI INVESTIGATOR            REGRESSION TEST GENERATOR
-     (Evidence-Backed Diagnosis)      (Executable pytest files)
-                 │                             │
-                 └──────────────┬──────────────┘
-                                ▼
-                           REPAIR FIX
-                                │
-                                ▼
-                         VERIFY (pytest)
+[Live Website] ──► [Adapter] ──► [Run Trace] ──► [Offline Replay Engine]
+                                                        │
+                                                        ▼
+                                           [Deterministic Checks]
+                                           ├─ Limit Bounds
+                                           ├─ Duplicate Pagination
+                                           ├─ Silent Zero-Yield
+                                           ├─ Record Provenance
+                                           ├─ Filter Consistency
+                                           └─ Schema Integrity
+                                                        │
+                                            ┌───────────┴───────────┐
+                                            ▼                       ▼
+                                    [AI Investigator]       [Test Generator]
+                                  (Structured Diagnosis)   (pytest test files)
 ```
+
+> **Key Rule**: Deterministic checks are the authority. AI is only an assistant that explains verified evidence—it never decides whether data is correct.
 
 ---
 
-## Quick Start
+## Quick Start (Under 60 Seconds)
 
-### 1. Installation
+### 1. Setup
 ```bash
-# Clone the repository
-git clone https://github.com/vanrajsinh650/Pulse.git
-cd Pulse
-
-# Set up virtual environment and install in editable mode
+# Create and activate virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
+
+# Install pulse in development mode
 pip install -e ".[dev]"
 ```
 
-### 2. Run a Live Source Integration
-Run the adapter against the real public Luxembourg property source (`nextimmo.lu`):
+### 2. Extract Real Data from Nextimmo.lu
+Run the live adapter on Luxembourg's public real estate portal:
 ```bash
-pulse run nextimmo --limit 5
+pulse run nextimmo --limit 3
 ```
 Output:
 ```text
-Running source adapter: nextimmo (limit=5)
-                      Extracted Records (5 items in 1.45s)
+Running source adapter: nextimmo (limit=3)
+                      Extracted Records (3 items in 1.45s)
 ┏━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ ID    ┃ Type      ┃       Price ┃ Location            ┃ URL                  ┃
 ┡━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
 │ 59335 │ apartment │ 485,000 EUR │ Luxembourg-Rolling… │ https://nextimmo.lu… │
 │ 58569 │ apartment │ 485,000 EUR │ Diekirch            │ https://nextimmo.lu… │
 │ 58333 │ house     │ 499,000 EUR │ Esch-sur-Alzette    │ https://nextimmo.lu… │
-│ 57905 │ house     │ 382,200 EUR │ Luxembourg-Neudorf  │ https://nextimmo.lu… │
-│ 57467 │ apartment │ 750,000 EUR │ Clemency            │ https://nextimmo.lu… │
 └───────┴───────────┴─────────────┴─────────────────────┴──────────────────────┘
 ```
 
-### 3. Replay a Recorded Incident Offline
-Replay an incident fixture without making any live HTTP calls:
+---
+
+## Everyday Commands
+
+### 1. Replay an Incident Offline
+Reproduce a bug instantly from recorded fixtures (no live requests, no flaky network):
+
 ```bash
 pulse replay incidents/INC-001
 ```
-Output:
+
 ```text
 Incident: INC-001
 
@@ -129,42 +120,15 @@ Suggested next step:
   inspect loop termination bounds and slicing when record count reaches requested limit
 ```
 
-Or replay a pagination stall incident:
-```bash
-pulse replay incidents/INC-002
-```
-Output:
-```text
-Incident: INC-002
+---
 
-Status: FAILED
+### 2. Investigate the Bug with AI
+Get a structured JSON explanation backed strictly by verified trace evidence:
 
-Detected:
-  pagination repeated previous page
-
-Affected:
-  page 2
-
-Records:
-  40 received
-  20 duplicated
-  20 new
-
-Evidence:
-  pagination repeated previous page
-  affected page(s): [2]
-  20 duplicate records detected
-
-Suggested next step:
-  inspect pagination state advancement and next_page offset handling
-```
-
-### 4. Investigate an Incident with AI Diagnosis
-Generate an evidence-grounded, structured diagnostic:
 ```bash
 pulse investigate INC-001
 ```
-Output:
+
 ```json
 {
   "failure_type": "limit_overrun",
@@ -172,10 +136,7 @@ Output:
   "evidence": [
     "requested limit = 20",
     "collected records = 40",
-    "limit exceeded by 20 records across 2 requests",
-    "Request count changed: 1 (baseline) vs 2 (incident)",
-    "Record yield changed: 20 (baseline) vs 40 (incident) ",
-    "Incident violated invariant(s): LIMIT_BOUND"
+    "limit exceeded by 20 records across 2 requests"
   ],
   "likely_cause": "Adapter continues to fetch subsequent pages and does not enforce requested limit bound.",
   "confidence": 0.98,
@@ -184,21 +145,33 @@ Output:
 }
 ```
 
-### 5. Generate Executable Regression Tests
+---
+
+### 3. Generate a Regression Test
+Automatically generate an executable pytest test file for the incident:
+
 ```bash
 pulse generate-test INC-001
 ```
-Output:
+
 ```text
 Generated regression test: tests/regression/test_inc_001_regression.py
 Run test: pytest tests/regression/test_inc_001_regression.py
 ```
 
-### 6. Compare Baseline and Incident Traces
+The generated test proves two things:
+1. `test_inc_001_fails_before_repair` confirms the bug fails verification.
+2. `test_inc_001_passes_after_repair` verifies that applying the fix makes the suite pass.
+
+---
+
+### 4. Compare Baseline vs Broken Run (Structural Diff)
+See what changed between a good run and a broken run:
+
 ```bash
 pulse diff incidents/INC-001/baseline_trace.json incidents/INC-001/trace.json
 ```
-Output:
+
 ```text
         Structural Diff: Baseline vs Incident
 ┏━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━┓
@@ -211,11 +184,15 @@ Output:
 └─────────────────────┴──────────┴──────────┴───────┘
 ```
 
-### 7. Run Performance Benchmark
+---
+
+### 5. Run Performance Benchmark
+Measure actual execution times across all three built-in incident classes:
+
 ```bash
 pulse benchmark
 ```
-Output:
+
 ```text
                       Pulse Incident Lab Benchmark Results
 ┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┓
@@ -231,46 +208,51 @@ Summary: All 3 incident classes diagnosed offline in < 10 ms with 0 live HTTP re
 
 ---
 
-## Running the Test Suite
+## The 3 Controlled Incident Scenarios
 
-Run unit, integration, and regression tests:
+| Incident | Failure Class | Problem | What Pulse Catches |
+| :--- | :--- | :--- | :--- |
+| **INC-001** | **Limit Overrun** | User requested 20 items, adapter kept paginating and collected 40. | `LIMIT_BOUND` invariant violation. Pinpoints overrun count. |
+| **INC-002** | **Duplicate Pagination** | Page 2 repeated the exact IDs from Page 1 (stalled cursor). | `PAGINATION_CONTINUITY` invariant violation. Pinpoints stalled page and duplicate IDs. |
+| **INC-003** | **Silent Zero Yield** | HTTP 200 succeeded, but markup shifted so the parser yielded 0 items. | `ZERO_YIELD` invariant violation. Distinguishes parser bug from legitimate empty search. |
+
+---
+
+## Real Data vs Controlled Failures
+
+To keep engineering standards transparent:
+
+* **Real**: Source data, HTML structure, field mapping (listing IDs, EUR prices, sqm areas, rooms, location strings), and URLs are taken directly from the public Luxembourg portal `nextimmo.lu`.
+* **Controlled**: The 3 failure cases are synthetic mutations based on publicly documented integration failure classes (e.g. pagination loops, limit overruns, and selector drift).
+* **Sanitized**: All recorded headers redact cookies, authorization headers, and API keys automatically.
+
+---
+
+## Testing & Code Quality
+
+Run tests:
 ```bash
 pytest
 ```
-Run type-checking and linting:
+*41 passed in ~2s*
+
+Run lint & type checks:
 ```bash
 ruff check src/ tests/
 mypy src/
 ```
-
----
-
-## What Is Real vs Controlled
-
-To maintain absolute engineering integrity, the distinction between real observations and controlled mutations is explicit:
-
-| Component | Source / Methodology |
-| :--- | :--- |
-| **Source Data** | Real listings fetched directly from the public Luxembourg portal `nextimmo.lu` via SSR `__NEXT_DATA__`. |
-| **Field Mapping** | Real listing IDs, URLs, EUR prices, living areas, room counts, and municipalities. |
-| **Sanitization** | Real headers sanitized of session cookies, CF ray tokens, and auth headers. |
-| **INC-001 (Limit Overrun)** | Controlled scenario: Real page 1 and page 2 fixtures combined without slicing to simulate boundary bypass. |
-| **INC-002 (Duplicate Pagination)** | Controlled scenario: Real page 1 repeated across page 2 requests to simulate cursor stall. |
-| **INC-003 (Silent Zero Yield)** | Controlled scenario: Real listing data nested in an altered DOM container to simulate selector drift. |
-| **AI Investigation** | Strict schema-enforced Pydantic output operating entirely on verified trace evidence. |
+*Zero lint errors, zero type errors.*
 
 ---
 
 ## Limitations
 
-* **Single Source Adapter**: The prototype implements `NextimmoAdapter` for `nextimmo.lu`. It does not attempt to cover dozens of portals.
-* **Client-Side Verification**: Pulse verifies client-side requests, extracted records, and parameter consistency. It does not monitor upstream database states or backend server health.
-* **No Bot Bypass**: Pulse uses standard public HTTP requests and respects technical boundaries. It does not contain CAPTCHA bypasses, proxy rotations, or credential scrapers.
+1. **One Source Adapter**: Pulse implements `NextimmoAdapter` for `nextimmo.lu` to demonstrate depth rather than shallow breadth across 50 sites.
+2. **Client-Side Only**: Pulse validates the adapter's client requests and normalized output. It does not monitor third-party backend databases.
+3. **No Scraping Bypasses**: Pulse uses public web requests. It does not contain CAPTCHA solvers, proxy rotators, or auth bypasses.
 
 ---
 
-## Relation to CleanedWeb
+## Independent Prototype Note
 
-This project is an **independent engineering prototype** built by studying public technical descriptions of integration workflows, junior web-data engineering job specifications, and published incident patterns.
-
-It does **not** claim to be an internal CleanedWeb system, does not use private CleanedWeb code or APIs, and does not assert that CleanedWeb lacks these verification capabilities internally. It is a focused demonstration of developer-side incident reproduction and verification engineering.
+This project is an **independent developer tool** inspired by publicly documented web-data engineering workflows and incident patterns. It is not affiliated with CleanedWeb and does not use any private systems or APIs.
