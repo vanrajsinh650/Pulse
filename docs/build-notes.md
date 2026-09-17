@@ -38,4 +38,16 @@ This log documents key milestones, architectural decisions, test verification, a
   - Added unit test suite `tests/test_adapter.py`.
 - **Why**: Proves real source extraction capabilities on public Luxembourg property data without scraping bypasses.
 - **How it was tested**: Unit tests in `tests/test_adapter.py` and live network probe extracting 5 real listings verified against `https://nextimmo.lu`.
-- **Commit**: `m2-adapter`
+- **Commit**: `206301a`
+
+---
+
+## Milestone 3: Run Recording & Deterministic Offline Replay
+- **Task**: Implement run trace serialization with credential redaction and offline replay transport.
+- **What changed**:
+  - Implemented `pulse.replay.recorder.save_run_trace` and `load_run_trace` with automatic sanitization of authorization headers, tokens, and sensitive query parameters.
+  - Implemented `pulse.replay.engine.ReplayEngine` providing an offline transport matching adapter requests to recorded traces without network access.
+  - Added test suite in `tests/test_replay.py`.
+- **Why**: Ensures incidents can be deterministically reproduced offline without network flakiness, credential leaks, or external rate limiting.
+- **How it was tested**: `pytest tests/test_replay.py` passed, verifying offline replay of multi-page adapter execution and secret sanitization.
+- **Commit**: `m3-replay`
