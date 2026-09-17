@@ -25,4 +25,17 @@ This log documents key milestones, architectural decisions, test verification, a
   - Added unit test suite `tests/test_contracts.py`.
 - **Why**: Clean canonical representations decouple source-specific adapter logic from verification, replay, and incident diagnosis engines.
 - **How it was tested**: `pytest tests/test_contracts.py` passed with 100% success.
-- **Commit**: `m1-contracts`
+- **Commit**: `b60bd4f`
+
+---
+
+## Milestone 2: Source Adapter Implementation
+- **Task**: Implement real public source adapter for Nextimmo.lu.
+- **What changed**:
+  - Created `pulse.adapters.base.BaseAdapter` with pluggable transport injection, bounded pagination, and clear error hierarchy (`SourceFetchError`, `SourceParseError`).
+  - Created `pulse.adapters.nextimmo.NextimmoAdapter` with SSR `__NEXT_DATA__` extraction, semantic property type mapping, price/area parsing, and header sanitization.
+  - Added string coercion for `property_type` in `PropertyRecord`.
+  - Added unit test suite `tests/test_adapter.py`.
+- **Why**: Proves real source extraction capabilities on public Luxembourg property data without scraping bypasses.
+- **How it was tested**: Unit tests in `tests/test_adapter.py` and live network probe extracting 5 real listings verified against `https://nextimmo.lu`.
+- **Commit**: `m2-adapter`

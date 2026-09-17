@@ -31,9 +31,11 @@ class PropertyRecord(BaseModel):
     location: Optional[str] = Field(default=None, description="Location description or municipality")
     observed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-    @field_validator("source_listing_id", mode="before")
+    @field_validator("source_listing_id", "property_type", mode="before")
     @classmethod
-    def stringify_listing_id(cls, v: Any) -> str:
+    def stringify_fields(cls, v: Any) -> Optional[str]:
+        if v is None:
+            return None
         return str(v).strip()
 
 
