@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Set
 from pydantic import BaseModel, Field
+
 from pulse.contracts.models import RunTrace
 from pulse.verification.engine import VerificationEngine
 
@@ -18,12 +18,12 @@ class DiffReport(BaseModel):
     unique_ids_incident: int
     added_ids_count: int
     removed_ids_count: int
-    duplicate_ids_in_incident: List[str] = Field(default_factory=list)
+    duplicate_ids_in_incident: list[str] = Field(default_factory=list)
     baseline_status: str
     incident_status: str
-    failed_invariants_baseline: List[str] = Field(default_factory=list)
-    failed_invariants_incident: List[str] = Field(default_factory=list)
-    differences_summary: List[str] = Field(default_factory=list)
+    failed_invariants_baseline: list[str] = Field(default_factory=list)
+    failed_invariants_incident: list[str] = Field(default_factory=list)
+    differences_summary: list[str] = Field(default_factory=list)
 
 
 class StructuralComparator:
@@ -33,15 +33,15 @@ class StructuralComparator:
         self.verifier = VerificationEngine()
 
     def compare(self, baseline: RunTrace, incident: RunTrace) -> DiffReport:
-        b_ids: List[str] = [r.source_listing_id for r in baseline.records]
-        i_ids: List[str] = [r.source_listing_id for r in incident.records]
+        b_ids: list[str] = [r.source_listing_id for r in baseline.records]
+        i_ids: list[str] = [r.source_listing_id for r in incident.records]
 
-        b_id_set: Set[str] = set(b_ids)
-        i_id_set: Set[str] = set(i_ids)
+        b_id_set: set[str] = set(b_ids)
+        i_id_set: set[str] = set(i_ids)
 
         # Detect duplicates within incident
-        seen: Set[str] = set()
-        dupes: List[str] = []
+        seen: set[str] = set()
+        dupes: list[str] = []
         for r_id in i_ids:
             if r_id in seen:
                 dupes.append(r_id)
@@ -54,7 +54,7 @@ class StructuralComparator:
         b_report = self.verifier.verify(baseline)
         i_report = self.verifier.verify(incident)
 
-        summaries: List[str] = []
+        summaries: list[str] = []
         if baseline.total_requests != incident.total_requests:
             summaries.append(
                 f"Request count changed: {baseline.total_requests} (baseline) vs {incident.total_requests} (incident)"

@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 import requests
 
 from pulse.adapters.base import BaseAdapter, SourceFetchError, SourceParseError, TransportFunc
@@ -17,7 +18,7 @@ class NextimmoAdapter(BaseAdapter):
 
     def __init__(
         self,
-        transport: Optional[TransportFunc] = None,
+        transport: TransportFunc | None = None,
         timeout_seconds: int = 10,
     ) -> None:
         super().__init__(transport=transport)
@@ -27,7 +28,7 @@ class NextimmoAdapter(BaseAdapter):
     def source_name(self) -> str:
         return "nextimmo"
 
-    def fetch_page(self, page: int, params: Optional[Dict[str, Any]] = None) -> RequestTrace:
+    def fetch_page(self, page: int, params: dict[str, Any] | None = None) -> RequestTrace:
         url = f"{self.BASE_URL}/search/page/{page}"
         request_params = params or {}
         headers = {
@@ -67,7 +68,7 @@ class NextimmoAdapter(BaseAdapter):
             raw_payload=response.text,
         )
 
-    def extract_raw_records(self, payload: str) -> List[Dict[str, Any]]:
+    def extract_raw_records(self, payload: str) -> list[dict[str, Any]]:
         if not payload:
             return []
 
@@ -101,7 +102,7 @@ class NextimmoAdapter(BaseAdapter):
         except (json.JSONDecodeError, AttributeError) as exc:
             raise SourceParseError(f"Corrupted __NEXT_DATA__ in Nextimmo page: {exc}") from exc
 
-    def normalize_record(self, raw: Dict[str, Any]) -> PropertyRecord:
+    def normalize_record(self, raw: dict[str, Any]) -> PropertyRecord:
         raw_id = raw.get("id") or raw.get("_id") or raw.get("refId")
         if not raw_id:
             raise ValueError("Raw record missing identifier")
@@ -117,7 +118,7 @@ class NextimmoAdapter(BaseAdapter):
 
         # Price extraction
         price_obj = raw.get("price")
-        price_val: Optional[float] = None
+        price_val: float | None = None
         currency = "EUR"
         if isinstance(price_obj, dict):
             val = price_obj.get("value")
@@ -132,7 +133,7 @@ class NextimmoAdapter(BaseAdapter):
 
         # Area extraction
         area_obj = raw.get("area")
-        area_val: Optional[float] = None
+        area_val: float | None = None
         if isinstance(area_obj, dict):
             val = area_obj.get("value")
             if val is not None:
@@ -145,7 +146,7 @@ class NextimmoAdapter(BaseAdapter):
 
         # Rooms
         rooms = raw.get("bedrooms") or raw.get("rooms")
-        room_val: Optional[int] = None
+        room_val: int | None = None
         if rooms is not None:
             try:
                 room_val = int(rooms)
@@ -154,7 +155,7 @@ class NextimmoAdapter(BaseAdapter):
 
         # Location
         loc_obj = raw.get("location")
-        loc_str: Optional[str] = None
+        loc_str: str | None = None
         if isinstance(loc_obj, dict):
             loc_str = loc_obj.get("name")
         elif isinstance(loc_obj, str):
@@ -165,10 +166,11 @@ class NextimmoAdapter(BaseAdapter):
         # Map property type
         type_code = raw.get("type")
         type_map = {1: "house", 2: "apartment", 3: "commercial", 4: "land", 5: "garage", 6: "office"}
+        property_type: str | None = None
         if isinstance(type_code, int):
             property_type = type_map.get(type_code, str(type_code))
-        else:
-            property_type = str(type_code) if type_code else None
+        elif type_code:
+            property_type = str(type_code)
 
         return PropertyRecord(
             property_entity_id=f"nextimmo:{listing_id}",

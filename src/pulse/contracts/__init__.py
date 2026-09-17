@@ -9,11 +9,11 @@ from pulse.contracts.models import (
 )
 
 __all__ = [
+    "IncidentReport",
+    "InvariantResult",
+    "InvariantType",
+    "InvestigationResult",
     "PropertyRecord",
     "RequestTrace",
     "RunTrace",
-    "InvariantType",
-    "InvariantResult",
-    "IncidentReport",
-    "InvestigationResult",
 ]

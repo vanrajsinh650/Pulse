@@ -1,4 +1,5 @@
 import json
+
 from pulse.contracts.models import InvariantType, PropertyRecord, RequestTrace, RunTrace
 from pulse.verification.engine import VerificationEngine
 

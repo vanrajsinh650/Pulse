@@ -7,6 +7,7 @@ Recommended Action: Inspect page progression and pagination state advancement in
 """
 
 from pathlib import Path
+
 import pulse
 from pulse.contracts.models import InvariantType
 from pulse.replay.recorder import load_run_trace

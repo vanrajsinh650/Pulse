@@ -1,4 +1,5 @@
 import json
+
 from pulse.adapters.nextimmo import NextimmoAdapter
 from pulse.contracts.models import PropertyRecord, RequestTrace, RunTrace
 from pulse.replay.engine import ReplayEngine

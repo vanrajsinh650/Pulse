@@ -7,6 +7,7 @@ Recommended Action: Inspect upstream payload structure and update JSON key or HT
 """
 
 from pathlib import Path
+
 import pulse
 from pulse.contracts.models import InvariantType
 from pulse.replay.recorder import load_run_trace
@@ -36,8 +37,10 @@ def test_inc_003_passes_after_repair():
 
     # Apply repair logic matching the incident classification
     # Repair: extract records from mutated payload structure
+    import json
+    import re
+
     from pulse.adapters.nextimmo import NextimmoAdapter
-    import json, re
     adapter = NextimmoAdapter()
     for req in trace.requests:
         payload = req.raw_payload or ""

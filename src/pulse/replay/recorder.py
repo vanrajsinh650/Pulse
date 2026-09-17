@@ -2,15 +2,15 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, Union
-from pulse.contracts.models import RunTrace
+from typing import Any
 
+from pulse.contracts.models import RunTrace
 
 SENSITIVE_HEADERS = {"cookie", "set-cookie", "authorization", "x-api-key", "token"}
 SENSITIVE_PARAMS = {"key", "api_key", "token", "auth", "secret"}
 
 
-def sanitize_dict(d: Dict[str, Any], sensitive_keys: set[str]) -> Dict[str, Any]:
+def sanitize_dict(d: dict[str, Any], sensitive_keys: set[str]) -> dict[str, Any]:
     sanitized = {}
     for k, v in d.items():
         if k.lower() in sensitive_keys:
@@ -20,7 +20,7 @@ def sanitize_dict(d: Dict[str, Any], sensitive_keys: set[str]) -> Dict[str, Any]
     return sanitized
 
 
-def save_run_trace(trace: RunTrace, target_path: Union[str, Path]) -> Path:
+def save_run_trace(trace: RunTrace, target_path: str | Path) -> Path:
     """Save a RunTrace to disk with security sanitization."""
     path = Path(target_path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -41,7 +41,7 @@ def save_run_trace(trace: RunTrace, target_path: Union[str, Path]) -> Path:
     return path
 
 
-def load_run_trace(source_path: Union[str, Path]) -> RunTrace:
+def load_run_trace(source_path: str | Path) -> RunTrace:
     """Load and validate a RunTrace from disk."""
     path = Path(source_path)
     if not path.exists():

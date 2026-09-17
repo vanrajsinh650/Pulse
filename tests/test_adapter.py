@@ -1,9 +1,10 @@
 import json
+
 import pytest
+
 from pulse.adapters.base import SourceParseError
 from pulse.adapters.nextimmo import NextimmoAdapter
 from pulse.contracts.models import RequestTrace
-
 
 SAMPLE_LISTING = {
     "id": 59335,

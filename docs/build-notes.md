@@ -96,4 +96,22 @@ This log documents key milestones, architectural decisions, test verification, a
   - Added test suites `tests/test_investigator.py` and `tests/test_generator.py`.
 - **Why**: Completes the incident reproduction loop: broken fixture -> incident detected -> AI diagnosis -> regression test generated -> test passes after repair.
 - **How it was tested**: `pytest` passed 33 tests across all modules.
-- **Commit**: `m6-investigator-generator`
+- **Commit**: `ee35417`
+
+---
+
+## Milestone 7: CLI, Benchmark & End-to-End Test Suite
+- **Task**: Implement unified developer CLI with rich output and end-to-end integration test suite.
+- **What changed**:
+  - Implemented `pulse.cli`:
+    - `pulse run`: Live extraction with Rich formatting and trace persistence.
+    - `pulse replay`: Deterministic offline replay with human-friendly failure reports.
+    - `pulse investigate`: Evidence-backed JSON diagnostics panel.
+    - `pulse generate-test`: Auto-generation of executable regression tests.
+    - `pulse diff`: Tabular baseline vs incident structural comparison.
+    - `pulse benchmark`: Precise performance timings across all 3 incident classes.
+  - Added CLI test suite `tests/test_cli.py` and full loop verification in `tests/test_end_to_end.py`.
+  - Enforced strict linting (`ruff`) and type safety (`mypy`).
+- **Why**: Delivers a finished, demonstrable developer workflow tool directly runnable via command line.
+- **How it was tested**: `pytest` passed all 41 unit and integration tests; `mypy` reported 0 type errors; `ruff` reported 0 lint errors.
+- **Commit**: `m7-cli-benchmark`

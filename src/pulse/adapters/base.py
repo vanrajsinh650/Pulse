@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import abc
 import uuid
-from typing import Any, Callable, Dict, List, Optional
+from collections.abc import Callable
+from typing import Any
+
 from pulse.contracts.models import PropertyRecord, RequestTrace, RunTrace
 
 
@@ -14,13 +16,13 @@ class SourceParseError(Exception):
     """Raised when an adapter fails to parse the upstream response payload."""
 
 
-TransportFunc = Callable[[str, Dict[str, Any], Dict[str, str]], RequestTrace]
+TransportFunc = Callable[[str, dict[str, Any], dict[str, str]], RequestTrace]
 
 
 class BaseAdapter(abc.ABC):
     """Base interface for source-specific web data adapters."""
 
-    def __init__(self, transport: Optional[TransportFunc] = None) -> None:
+    def __init__(self, transport: TransportFunc | None = None) -> None:
         self.transport = transport
 
     @property
@@ -29,22 +31,22 @@ class BaseAdapter(abc.ABC):
         """Name of the source, e.g. 'nextimmo'."""
 
     @abc.abstractmethod
-    def fetch_page(self, page: int, params: Optional[Dict[str, Any]] = None) -> RequestTrace:
+    def fetch_page(self, page: int, params: dict[str, Any] | None = None) -> RequestTrace:
         """Fetch a single page, capturing network trace."""
 
     @abc.abstractmethod
-    def extract_raw_records(self, payload: str) -> List[Dict[str, Any]]:
+    def extract_raw_records(self, payload: str) -> list[dict[str, Any]]:
         """Extract unnormalized record dictionaries from page payload."""
 
     @abc.abstractmethod
-    def normalize_record(self, raw: Dict[str, Any]) -> PropertyRecord:
+    def normalize_record(self, raw: dict[str, Any]) -> PropertyRecord:
         """Transform unnormalized raw record into canonical PropertyRecord."""
 
     def run(self, limit: int = 50, start_page: int = 1) -> RunTrace:
         """Execute extraction run up to the requested limit."""
         run_id = f"run-{uuid.uuid4().hex[:8]}"
-        requests: List[RequestTrace] = []
-        records: List[PropertyRecord] = []
+        requests: list[RequestTrace] = []
+        records: list[PropertyRecord] = []
         current_page = start_page
 
         while len(records) < limit:

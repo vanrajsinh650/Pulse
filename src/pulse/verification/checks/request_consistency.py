@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any
+
 from pulse.contracts.models import InvariantResult, InvariantType, RunTrace
 
 
@@ -16,14 +17,14 @@ def check_request_consistency(trace: RunTrace) -> InvariantResult:
         )
 
     # Filter out pagination-specific params (e.g., page, offset) to compare base query filters
-    def base_params(params: Dict[str, Any]) -> Dict[str, Any]:
+    def base_params(params: dict[str, Any]) -> dict[str, Any]:
         return {k: v for k, v in params.items() if k.lower() not in {"page", "p", "offset", "start"}}
 
     first_req = trace.requests[0]
     expected_filters = base_params(first_req.params)
 
-    inconsistent_pages: List[int] = []
-    discrepancies: List[str] = []
+    inconsistent_pages: list[int] = []
+    discrepancies: list[str] = []
 
     for req in trace.requests[1:]:
         current_filters = base_params(req.params)

@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-import json
 import os
-from typing import Any, Dict, List, Optional
+
 from pulse.contracts.models import IncidentReport, InvariantType, InvestigationResult
 from pulse.diff.comparator import DiffReport
 
 
 def synthesize_evidence_diagnosis(
     report: IncidentReport,
-    diff: Optional[DiffReport] = None,
-    code_snippet: Optional[str] = None,
+    diff: DiffReport | None = None,
+    code_snippet: str | None = None,
 ) -> InvestigationResult:
     """Deterministic, evidence-grounded diagnostic synthesizer strictly adhering to verified facts."""
     if not report.failed_invariants:
@@ -27,7 +26,7 @@ def synthesize_evidence_diagnosis(
     first_inv = report.failed_invariants[0]
     inv_result = next(r for r in report.results if r.invariant == first_inv)
 
-    evidence: List[str] = list(inv_result.evidence)
+    evidence: list[str] = list(inv_result.evidence)
     if diff:
         evidence.extend(diff.differences_summary)
 
@@ -113,14 +112,14 @@ def synthesize_evidence_diagnosis(
 class AIInvestigator:
     """Evidence-based incident diagnosis investigator."""
 
-    def __init__(self, api_key: Optional[str] = None) -> None:
+    def __init__(self, api_key: str | None = None) -> None:
         self.api_key = api_key or os.environ.get("OPENAI_API_KEY") or os.environ.get("GEMINI_API_KEY")
 
     def investigate(
         self,
         report: IncidentReport,
-        diff: Optional[DiffReport] = None,
-        code_snippet: Optional[str] = None,
+        diff: DiffReport | None = None,
+        code_snippet: str | None = None,
     ) -> InvestigationResult:
         """Diagnose incident strictly using verified facts and evidence."""
         # AI is the assistant, deterministic verification is the authority.

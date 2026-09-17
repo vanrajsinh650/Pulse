@@ -7,6 +7,7 @@ Recommended Action: Enforce requested limit boundary and slice accumulated recor
 """
 
 from pathlib import Path
+
 import pulse
 from pulse.contracts.models import InvariantType
 from pulse.replay.recorder import load_run_trace

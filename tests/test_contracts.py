@@ -1,8 +1,4 @@
-from datetime import datetime, timezone
 from pulse.contracts.models import (
-    IncidentReport,
-    InvariantResult,
-    InvariantType,
     InvestigationResult,
     PropertyRecord,
     RequestTrace,

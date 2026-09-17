@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from typing import List, Optional
 from pulse.contracts.models import IncidentReport, InvariantResult, InvariantType, RunTrace
 from pulse.verification.checks.limit_bound import check_limit_bound
 from pulse.verification.checks.pagination_continuity import check_pagination_continuity
@@ -23,9 +22,9 @@ class VerificationEngine:
             check_schema_integrity,
         ]
 
-    def verify(self, trace: RunTrace, incident_id: Optional[str] = None) -> IncidentReport:
-        results: List[InvariantResult] = []
-        failed_invariants: List[InvariantType] = []
+    def verify(self, trace: RunTrace, incident_id: str | None = None) -> IncidentReport:
+        results: list[InvariantResult] = []
+        failed_invariants: list[InvariantType] = []
 
         for check_fn in self.checks:
             result = check_fn(trace)

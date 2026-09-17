@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional, Union
+
 from pulse.contracts.models import IncidentReport, InvariantType, InvestigationResult
 
 
@@ -9,7 +9,7 @@ def generate_regression_test(
     incident_id: str,
     report: IncidentReport,
     investigation: InvestigationResult,
-    output_dir: Optional[Union[str, Path]] = None,
+    output_dir: str | Path | None = None,
 ) -> Path:
     """Generate an executable pytest regression test file asserting invariant failure before fix and success after fix."""
     target_dir = Path(output_dir) if output_dir else Path("tests/regression")

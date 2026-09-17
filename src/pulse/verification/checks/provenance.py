@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from typing import List
 from pulse.contracts.models import InvariantResult, InvariantType, RunTrace
 
 
@@ -15,8 +14,8 @@ def check_provenance(trace: RunTrace) -> InvariantResult:
             evidence=["no records to verify provenance on"],
         )
 
-    missing_provenance_ids: List[str] = []
-    reasons: List[str] = []
+    missing_provenance_ids: list[str] = []
+    reasons: list[str] = []
 
     for rec in trace.records:
         rec_id = rec.source_listing_id

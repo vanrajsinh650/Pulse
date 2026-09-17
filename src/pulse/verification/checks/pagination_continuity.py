@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from typing import Dict, List, Set
 from pulse.contracts.models import InvariantResult, InvariantType, RunTrace
 
 
@@ -16,8 +15,8 @@ def check_pagination_continuity(trace: RunTrace) -> InvariantResult:
         )
 
     # Check overall duplicate records
-    seen_ids: Set[str] = set()
-    duplicate_ids: List[str] = []
+    seen_ids: set[str] = set()
+    duplicate_ids: list[str] = []
     for record in trace.records:
         if record.source_listing_id in seen_ids:
             duplicate_ids.append(record.source_listing_id)
@@ -25,14 +24,14 @@ def check_pagination_continuity(trace: RunTrace) -> InvariantResult:
             seen_ids.add(record.source_listing_id)
 
     # Check request payload hash/content duplication
-    payload_to_pages: Dict[str, List[int]] = {}
+    payload_to_pages: dict[str, list[int]] = {}
     for req in trace.requests:
         payload = (req.raw_payload or "").strip()
         if payload:
             payload_to_pages.setdefault(payload, []).append(req.page)
 
-    duplicate_pages: List[int] = []
-    for _, pages in payload_to_pages.items():
+    duplicate_pages: list[int] = []
+    for pages in payload_to_pages.values():
         if len(pages) > 1:
             duplicate_pages.extend(pages[1:])
 
@@ -67,7 +66,7 @@ def check_pagination_continuity(trace: RunTrace) -> InvariantResult:
             "duplicate_pages": duplicate_pages,
         },
         evidence=[
-            f"pagination repeated previous page",
+            "pagination repeated previous page",
             f"affected page(s): {affected_pages}",
             f"{len(duplicate_ids)} duplicate records detected",
         ],

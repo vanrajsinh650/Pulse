@@ -1,9 +1,9 @@
 from pathlib import Path
+
 from pulse.contracts.models import InvariantType
 from pulse.diff.comparator import StructuralComparator
 from pulse.replay.recorder import load_run_trace
 from pulse.verification.engine import VerificationEngine
-
 
 INCIDENTS_DIR = Path(__file__).parent.parent / "incidents"
 

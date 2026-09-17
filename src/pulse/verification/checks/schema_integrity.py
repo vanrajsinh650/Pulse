@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from typing import List
 from pulse.contracts.models import InvariantResult, InvariantType, PropertyRecord, RunTrace
 
 
@@ -15,8 +14,8 @@ def check_schema_integrity(trace: RunTrace) -> InvariantResult:
             evidence=["no records to validate"],
         )
 
-    invalid_record_ids: List[str] = []
-    errors: List[str] = []
+    invalid_record_ids: list[str] = []
+    errors: list[str] = []
 
     for rec in trace.records:
         try:
@@ -33,7 +32,7 @@ def check_schema_integrity(trace: RunTrace) -> InvariantResult:
             if rec.rooms is not None and rec.rooms < 0:
                 invalid_record_ids.append(rec.source_listing_id)
                 errors.append(f"Record {rec.source_listing_id} negative rooms ({rec.rooms})")
-        except Exception as exc:
+        except (ValueError, TypeError) as exc:
             invalid_record_ids.append(rec.source_listing_id)
             errors.append(f"Record {rec.source_listing_id} schema violation: {exc}")
 
