@@ -68,7 +68,10 @@ source changes / adapter breaks
 python3 -m venv .venv
 source .venv/bin/activate
 
-# Install pulse in development mode
+# Install pulse (normal user)
+pip install -e .
+
+# Install pulse with dev tools (only if you want to run tests/lint)
 pip install -e ".[dev]"
 ```
 
@@ -267,7 +270,7 @@ Run tests:
 ```bash
 pytest
 ```
-*47 passed in ~2.8s (100% offline, zero live network dependencies)*
+*40 passed in ~0.6s (100% offline, zero live network dependencies)*
 
 Run lint & type checks:
 ```bash
