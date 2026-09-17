@@ -62,7 +62,6 @@ class RunTrace(BaseModel):
     requested_limit: int | None = None
     requests: list[RequestTrace] = Field(default_factory=list)
     records: list[PropertyRecord] = Field(default_factory=list)
-    metadata: dict[str, Any] = Field(default_factory=dict)
 
     @property
     def total_records(self) -> int:

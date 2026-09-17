@@ -32,7 +32,6 @@ dev = [
 
 [project.scripts]
 pulse = "pulse.cli:main"
-cw-incident = "pulse.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -50,7 +50,6 @@ INVESTIGATOR_SYSTEM_INSTRUCTION = (
 def synthesize_evidence_diagnosis(
     report: IncidentReport,
     diff: DiffReport | None = None,
-    code_snippet: str | None = None,
 ) -> InvestigationResult:
     """Deterministic, evidence-grounded diagnostic synthesizer strictly adhering to verified facts."""
     if not report.failed_invariants:
@@ -161,7 +160,6 @@ def synthesize_evidence_diagnosis(
 def build_investigation_prompt(
     report: IncidentReport,
     diff: DiffReport | None = None,
-    code_snippet: str | None = None,
     trace: RunTrace | None = None,
 ) -> str:
     """Build a sanitized, evidence-grounded prompt without leaking credentials or raw payloads."""
@@ -210,9 +208,6 @@ def build_investigation_prompt(
                 f"Page {req.page}: {req.method} {req.url} -> Status {req.status_code}, Response Size: {req.response_size} bytes"
             )
 
-    if code_snippet:
-        prompt_parts.append(f"\n--- Relevant Parser/Adapter Code Snippet ---\n{code_snippet}")
-
     return "\n".join(prompt_parts)
 
 
@@ -245,7 +240,6 @@ class AIInvestigator:
         self,
         report: IncidentReport,
         diff: DiffReport | None = None,
-        code_snippet: str | None = None,
         trace: RunTrace | None = None,
     ) -> InvestigationResult:
         """Diagnose incident strictly using verified facts and evidence.
@@ -255,14 +249,14 @@ class AIInvestigator:
         """
         # 1. Authority: AI never decides pass/fail or diagnoses healthy runs as broken
         if not report.failed_invariants:
-            return synthesize_evidence_diagnosis(report, diff=diff, code_snippet=code_snippet)
+            return synthesize_evidence_diagnosis(report, diff=diff)
 
         # 2. Check client availability
         if self._client is None:
-            return synthesize_evidence_diagnosis(report, diff=diff, code_snippet=code_snippet)
+            return synthesize_evidence_diagnosis(report, diff=diff)
 
         # 3. Build focused, sanitized context
-        user_prompt = build_investigation_prompt(report, diff=diff, code_snippet=code_snippet, trace=trace)
+        user_prompt = build_investigation_prompt(report, diff=diff, trace=trace)
 
         # 4. Request structured diagnosis from Gemini
         try:
@@ -286,7 +280,7 @@ class AIInvestigator:
                     config=config,
                 )
             else:
-                return synthesize_evidence_diagnosis(report, diff=diff, code_snippet=code_snippet)
+                return synthesize_evidence_diagnosis(report, diff=diff)
 
             parsed: InvestigationResult | None = None
             if hasattr(response, "parsed") and isinstance(response.parsed, InvestigationResult):
@@ -310,7 +304,8 @@ class AIInvestigator:
 
                 return parsed
 
-            return synthesize_evidence_diagnosis(report, diff=diff, code_snippet=code_snippet)
+            return synthesize_evidence_diagnosis(report, diff=diff)
         except Exception:  # noqa: BLE001
             # Fallback on any API, network, rate-limit, or parsing error
-            return synthesize_evidence_diagnosis(report, diff=diff, code_snippet=code_snippet)
+            return synthesize_evidence_diagnosis(report, diff=diff)
+
