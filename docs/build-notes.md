@@ -50,4 +50,22 @@ This log documents key milestones, architectural decisions, test verification, a
   - Added test suite in `tests/test_replay.py`.
 - **Why**: Ensures incidents can be deterministically reproduced offline without network flakiness, credential leaks, or external rate limiting.
 - **How it was tested**: `pytest tests/test_replay.py` passed, verifying offline replay of multi-page adapter execution and secret sanitization.
-- **Commit**: `m3-replay`
+- **Commit**: `6bdf4c2`
+
+---
+
+## Milestone 4: Deterministic Verification Engine
+- **Task**: Implement deterministic invariant checks and reporting engine.
+- **What changed**:
+  - Created `pulse.verification.checks`:
+    - `limit_bound.py`: Verifies collected count does not overrun requested limit.
+    - `pagination_continuity.py`: Detects repeated pages and pagination stalls.
+    - `zero_yield.py`: Distinguishes legitimate empty source from silent parser failure on substantial payload.
+    - `provenance.py`: Guarantees source name, ID, valid URL, and timestamp.
+    - `request_consistency.py`: Detects filter/parameter divergence across pages.
+    - `schema_integrity.py`: Validates numerical constraints and schema conformity.
+  - Implemented `VerificationEngine` coordinating checks and emitting structured `IncidentReport` with actionable next steps.
+  - Added unit test suite `tests/test_verification.py`.
+- **Why**: Ground truth must be 100% deterministic and mathematical rather than probabilistic or dependent on an LLM.
+- **How it was tested**: `pytest tests/test_verification.py` passed with 8 comprehensive scenarios covering passes, failures, and edge cases.
+- **Commit**: `m4-verification`
