@@ -83,4 +83,17 @@ This log documents key milestones, architectural decisions, test verification, a
   - Added test suite `tests/test_incidents.py`.
 - **Why**: Enables instant offline replay of realistic failure classes based on publicly observed integration incidents.
 - **How it was tested**: `pytest tests/test_incidents.py` verified all three incident classes and diff metric generation.
-- **Commit**: `m5-incidents`
+- **Commit**: `c89a4ff`
+
+---
+
+## Milestone 6: AI Investigator & Regression Test Generator
+- **Task**: Implement evidence-backed AI diagnostic assistant and executable test generator.
+- **What changed**:
+  - Implemented `pulse.investigator.agent.AIInvestigator` providing structured JSON root cause diagnosis strictly grounded on verified facts.
+  - Implemented `pulse.generator.test_generator.generate_regression_test` writing executable pytest test files that fail before repair and pass after repair.
+  - Pre-generated executable regression tests for `INC-001`, `INC-002`, and `INC-003` in `tests/regression/`.
+  - Added test suites `tests/test_investigator.py` and `tests/test_generator.py`.
+- **Why**: Completes the incident reproduction loop: broken fixture -> incident detected -> AI diagnosis -> regression test generated -> test passes after repair.
+- **How it was tested**: `pytest` passed 33 tests across all modules.
+- **Commit**: `m6-investigator-generator`
