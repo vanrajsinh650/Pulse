@@ -1,0 +1,9 @@
+{
+  "incident_id": "INC-003",
+  "name": "Silent Zero Yield After Upstream Markup Evolution",
+  "description": "Controlled regression based on a publicly observed failure class: HTTP succeeds and response is substantial, but modified source structure causes parser to silently yield 0 records.",
+  "category": "SOURCE_CHANGE",
+  "expected_invariant": "ZERO_YIELD",
+  "status_code": 200,
+  "payload_length": 103407
+}

@@ -1,0 +1,9 @@
+{
+  "incident_id": "INC-002",
+  "name": "Duplicate Page Ingestion from Pagination Stall",
+  "description": "Controlled regression based on a publicly observed failure class: pagination query parameter did not increment, repeating previous page records.",
+  "category": "REQUEST_CONSISTENCY",
+  "expected_invariant": "PAGINATION_CONTINUITY",
+  "page": 2,
+  "duplicated_count": 20
+}

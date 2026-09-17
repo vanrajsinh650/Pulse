@@ -1,0 +1,9 @@
+{
+  "incident_id": "INC-001",
+  "name": "Limit Overrun on Multi-Page Extraction",
+  "description": "Controlled regression based on a publicly observed failure class: adapter fails to terminate when reaching requested record count and fetches additional pages.",
+  "category": "RESULT_INTEGRITY",
+  "expected_invariant": "LIMIT_BOUND",
+  "requested_limit": 20,
+  "observed_records": 40
+}

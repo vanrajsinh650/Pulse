@@ -68,4 +68,19 @@ This log documents key milestones, architectural decisions, test verification, a
   - Added unit test suite `tests/test_verification.py`.
 - **Why**: Ground truth must be 100% deterministic and mathematical rather than probabilistic or dependent on an LLM.
 - **How it was tested**: `pytest tests/test_verification.py` passed with 8 comprehensive scenarios covering passes, failures, and edge cases.
-- **Commit**: `m4-verification`
+- **Commit**: `05bc6b4`
+
+---
+
+## Milestone 5: Controlled Incidents & Structural Diff
+- **Task**: Create reproducible controlled incident packages and structural diff comparator.
+- **What changed**:
+  - Built real-data controlled incidents:
+    - `incidents/INC-001`: Limit overrun (requested 20, collected 40, failed `LIMIT_BOUND`).
+    - `incidents/INC-002`: Duplicate pagination (page 2 repeats page 1 IDs, failed `PAGINATION_CONTINUITY`).
+    - `incidents/INC-003`: Silent zero yield (HTTP 200 with substantial mutated markup, failed `ZERO_YIELD`).
+  - Implemented `pulse.diff.comparator.StructuralComparator` producing comprehensive baseline vs incident delta metrics.
+  - Added test suite `tests/test_incidents.py`.
+- **Why**: Enables instant offline replay of realistic failure classes based on publicly observed integration incidents.
+- **How it was tested**: `pytest tests/test_incidents.py` verified all three incident classes and diff metric generation.
+- **Commit**: `m5-incidents`
