@@ -36,7 +36,7 @@ source changes / adapter breaks
 
 ```text
 [Live Website] ──► [Adapter] ──► [Run Trace] ──► [Offline Replay Engine]
-                                                        │
+                                                        │ (From incidents/ library)
                                                         ▼
                                            [Deterministic Checks]
                                            ├─ Limit Bounds
@@ -48,8 +48,12 @@ source changes / adapter breaks
                                                         │
                                             ┌───────────┴───────────┐
                                             ▼                       ▼
-                                    [AI Investigator]       [Test Generator]
-                                  (Structured Diagnosis)   (pytest test files)
+                                   [AI Investigator]        [Test Generator]
+                                            │              (pytest test files)
+                                  ┌─────────┴─────────┐
+                                  ▼                   ▼
+                         [Gemini 3.1 Flash-Lite]  [Deterministic Fallback]
+                         (Online Reasoning)      (Offline Heuristic)
 ```
 
 > **Key Rule**: Deterministic verification identifies whether a run violates declared invariants. When an incident is detected, Pulse can send the verified incident evidence to Gemini for a structured debugging diagnosis. AI does not determine correctness and cannot override verification results.
@@ -125,9 +129,14 @@ Suggested next step:
 ### 2. Investigate the Bug with AI (Gemini 3.1 Flash-Lite)
 Deterministic verification identifies whether a run violates declared invariants. When an incident is detected, Pulse can send the verified incident evidence to Gemini for a structured debugging diagnosis. AI does not determine correctness and cannot override verification results.
 
-To investigate using Gemini:
+To investigate using Gemini, configure your API key either in `.env` (automatically discovered) or in your shell:
 ```bash
-export GEMINI_API_KEY="..."
+# Option A: In a .env file
+echo "GEMINI_API_KEY=your-api-key" > .env
+
+# Option B: In your shell
+export GEMINI_API_KEY="your-api-key"
+
 pulse investigate INC-001
 ```
 
@@ -216,12 +225,23 @@ pulse benchmark
 │ INC-003  │ Silent Zero Yield    │     0.64 ms │           0.28 ms │           0.02 ms │       1 request │ 100% deterministic │
 └──────────┴──────────────────────┴─────────────┴───────────────────┴───────────────────┴─────────────────┴────────────────────┘
 
-Summary: All 3 incident classes diagnosed offline in < 10 ms with 0 live HTTP requests made.
+Summary: All 3 incident classes verified deterministically with 0 live HTTP requests made.
 ```
 
 ---
 
-## The 3 Controlled Incident Scenarios
+## Why the `incidents/` Folder Exists (Scraper Flight Data Recorder)
+
+In production scraping, reproducing integration bugs against live websites is unreliable: target pages mutate continuously, listings get removed, and target hosts enforce IP bans or Cloudflare rate-limits.
+
+The `incidents/` directory acts as an immutable, version-controlled **flight data recorder** for web data integrations. Each incident package contains:
+- `incident.json`: Metadata defining the failure classification, expected invariant, and target bounds.
+- `trace.json`: The recorded broken run trace containing HTTP requests, query params, status codes, response sizes, sanitized headers, and parsed records.
+- `baseline_trace.json`: The recorded healthy run trace prior to the regression.
+
+This allows developers and CI/CD pipelines to replay, diff, verify, and diagnose bugs **100% offline in under 2ms** without making a single live network call.
+
+### The 3 Controlled Incident Scenarios
 
 | Incident | Failure Class | Problem | What Pulse Catches |
 | :--- | :--- | :--- | :--- |
@@ -247,7 +267,7 @@ Run tests:
 ```bash
 pytest
 ```
-*41 passed in ~2s*
+*47 passed in ~2.8s (100% offline, zero live network dependencies)*
 
 Run lint & type checks:
 ```bash

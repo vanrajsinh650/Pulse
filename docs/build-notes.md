@@ -115,3 +115,20 @@ This log documents key milestones, architectural decisions, test verification, a
 - **Why**: Delivers a finished, demonstrable developer workflow tool directly runnable via command line.
 - **How it was tested**: `pytest` passed all 41 unit and integration tests; `mypy` reported 0 type errors; `ruff` reported 0 lint errors.
 - **Commit**: `m7-cli-benchmark`
+
+---
+
+## Milestone 8: Real Google Gemini Integration & Resilient Fallback
+- **Task**: Connect real `gemini-3.1-flash-lite` via official `google-genai` SDK with deterministic verification authority and fallback.
+- **What changed**:
+  - Added `google-genai>=2.0.0` as single AI dependency in `pyproject.toml`.
+  - Implemented `AIInvestigator` calling `client.models.generate_content` with Pydantic structured output (`response_schema=InvestigationResult`).
+  - Added credential-free prompt builder forwarding only verified invariant evidence, request metadata, and diff metrics (< 400 tokens).
+  - Added 15-second network timeout guard (`types.HttpOptions(timeout=15000)`) and disabled automatic function calling.
+  - Added auto-discovery of `GEMINI_API_KEY` from `.env` or environment with strict `PYTEST_CURRENT_TEST` isolation.
+  - Preserved deterministic `synthesize_evidence_diagnosis` as robust fallback for missing keys, rate limits (HTTP 429), or network dropouts.
+  - Added comprehensive test suite in `tests/test_investigator.py` with injectable mock client (testing valid AI output, invalid JSON fallback, API errors, `insufficient_evidence`, confidence bounds, and evidence preservation).
+  - Updated CLI output to clearly report `Investigation source: Gemini 3.1 Flash-Lite` or `Investigation source: deterministic fallback`.
+- **Why**: Replaced static placeholder with real LLM reasoning while guaranteeing zero network calls in tests and zero CLI crashes when offline.
+- **How it was tested**: `pytest` passed all 47 tests in ~2.8s offline; live Gemini diagnosis confirmed against `INC-001`.
+- **Commits**: `8791ab5`, `57e8915`
