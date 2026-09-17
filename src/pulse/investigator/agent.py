@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import Any
 
 from google import genai
@@ -8,6 +9,24 @@ from google.genai import types
 
 from pulse.contracts.models import IncidentReport, InvariantType, InvestigationResult, RunTrace
 from pulse.diff.comparator import DiffReport
+
+
+def _load_env_file(path: str = ".env") -> None:
+    if os.environ.get("PYTEST_CURRENT_TEST"):
+        return
+    p = Path(path)
+    if p.is_file():
+        try:
+            for line in p.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    k, v = line.split("=", 1)
+                    k = k.strip()
+                    v = v.strip().strip("\"'")
+                    if k and k not in os.environ:
+                        os.environ[k] = v
+        except Exception:  # noqa: BLE001, S110
+            pass
 
 INVESTIGATOR_SYSTEM_INSTRUCTION = (
     "You are an integration debugging assistant.\n"
@@ -208,7 +227,12 @@ class AIInvestigator:
         client: Any | None = None,
         model: str = DEFAULT_MODEL,
     ) -> None:
-        self.api_key = api_key or os.environ.get("GEMINI_API_KEY")
+        if not os.environ.get("PYTEST_CURRENT_TEST"):
+            if not os.environ.get("GEMINI_API_KEY"):
+                _load_env_file()
+            self.api_key = api_key or os.environ.get("GEMINI_API_KEY")
+        else:
+            self.api_key = api_key
         self.model = model
         self._client = client
         if self._client is None and self.api_key:
